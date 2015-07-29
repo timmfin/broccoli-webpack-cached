@@ -6,11 +6,6 @@ var Plugin = require('broccoli-plugin');
 var symlinkOrCopySync = require('symlink-or-copy').sync;
 
 
-// Other broccoli webpack plugins (this hopes to replace):
-//   - https://github.com/myfreeweb/broccoli-webpack
-//   - https://github.com/rafales/broccoli-webpack-fast
-
-
 function WebpackFilter(inputNode, options) {
   if (!(this instanceof WebpackFilter)) return new WebpackFilter(inputNode, options);
 
