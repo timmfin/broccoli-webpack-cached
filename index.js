@@ -28,8 +28,6 @@ WebpackFilter.prototype.initializeCompiler = function() {
   if (this.options.cache) throw new Error("WebpackFilter will set the webpack cache, you shouldn't set it.");
   if (this.options.output && this.options.output.path) throw new Error("WebpackFilter will set the webpack output.path, you shouldn't set it.");
 
-  console.log('Webpack context:', this.inputPaths[0]);
-
   this.options.context = this.inputPaths[0];
   this.options.output = this.options.output || {};
   this.options.output.path = this.cachePath;
@@ -38,12 +36,12 @@ WebpackFilter.prototype.initializeCompiler = function() {
   // build and rely on it to only build what is necessary)
   this.options.cache = this._webpackCache = {};
 
-  this.compiler = webpack(this.options);
+  return webpack(this.options);
 }
 
 WebpackFilter.prototype.build = function() {
   if (this.compiler === undefined) {
-    this.initializeCompiler();
+    this.compiler = this.initializeCompiler();
   }
 
   var that = this;
