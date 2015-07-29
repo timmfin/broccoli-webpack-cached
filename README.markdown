@@ -20,6 +20,7 @@ var WebpackFilter = require('broccoli-webpack-cached');
 //     `cache`, or `output` options (because this plugin will set them for you).
 //
 var webpackModulesTree = WebpackFilter(inputTree, {
+  // Random example of webpack configuration ...
   entry: {
     one: "./entry.js",
     two: "./entry2.js",
