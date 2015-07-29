@@ -10,5 +10,6 @@
     "webpack": "^1.10.5"
   },
   "devDependencies": {},
-  "author": "tfinley@hubspot.com"
+  "author": "tfinley@hubspot.com",
+  "repository" : "timmfin/broccoli-webpack-cached"
 }
