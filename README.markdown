@@ -50,7 +50,7 @@ var webpackModulesTree = WebpackFilter(inputTree, {
     preLoaders: [
       {
         test: /\.js$/,
-        loaders: ["source-map-loader", "/Users/tfinley/src/brocpack-tester/directive-loader.js"]
+        loaders: ["source-map-loader"]
       }
     ],
 
