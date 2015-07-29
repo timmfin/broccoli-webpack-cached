@@ -35,12 +35,11 @@ var webpackModulesTree = WebpackFilter(inputTree, {
     jquery: 'jQuery'
   },
 
+  // What seemed like the best option/tradeoff for faster but working source maps (at least for me)
   devtool: 'cheap-module-inline-source-map',
 
   plugins: [
     new webpack.optimize.CommonsChunkPlugin("extra.bundle.js"),
-
-    // Use the plugin to specify the resulting filename (and add needed behavior to the compiler)
     new ExtractTextPlugin("[name].css", {
       allChunks: false
     })
@@ -49,11 +48,12 @@ var webpackModulesTree = WebpackFilter(inputTree, {
   module: {
     preLoaders: [
       {
+        // Use the source-map-loader to pass along source maps from earlier Broccoli plugins (they
+        // should be inline source maps)
         test: /\.js$/,
         loaders: ["source-map-loader"]
       }
     ],
-
     loaders: [{
       test: /\.css$/,
       loader: ExtractTextPlugin.extract("style-loader", "css-loader?sourceMap")
