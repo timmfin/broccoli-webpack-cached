@@ -3,6 +3,8 @@ Yet another webpack plugin for Broccoli. This one relies on webpack's caching, b
 
 This means it should be fast _and_ compatible with other Broccoli plugins (unlike [myfreeweb/broccoli-webpack](https://github.com/myfreeweb/broccoli-webpack) and [rafales/broccoli-webpack-fast](https://github.com/rafales/broccoli-webpack-fast))
 
+Note, internally this uses the [PreventResolveSymlinkPlugin](./prevent-resolve-symlink-plugin.js) to prevent Webpack's symlink resolution behavior from breaking relative paths inside of symlinked modules. But you can disable that by passing in the `preventSymlinkResolution: false` option (some context in [this thread](https://github.com/webpack/webpack/issues/554#issuecomment-135797738)).
+
 ### Using
 
 Inside your `Brocfile.js`:
