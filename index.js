@@ -5,6 +5,8 @@ var webpack = require('webpack');
 var Plugin = require('broccoli-plugin');
 var symlinkOrCopySync = require('symlink-or-copy').sync;
 
+var PreventResolveSymlinkPlugin = require('./prevent-resolve-symlink-plugin');
+
 
 function WebpackFilter(inputNode, options) {
   if (!(this instanceof WebpackFilter)) return new WebpackFilter(inputNode, options);
@@ -35,6 +37,16 @@ WebpackFilter.prototype.initializeCompiler = function() {
   // Let webpack do all the caching (we will call webpack's compile method every
   // build and rely on it to only build what is necessary)
   this.options.cache = this._webpackCache = {};
+
+  // Prevent Webpack's ResultSymlinkPlugin from breaking relative paths in symlinked
+  // modules (a common problem with Broccoli's highly symlinked output trees).
+  // This is on by default, but can be disabled.
+  if (this.options.preventSymlinkResolution === true || this.options.preventSymlinkResolution === undefined)  {
+    this.options.plugins = this.options.plugins || [];
+    this.options.plugins.push(
+      new webpack.ResolverPlugin([PreventResolveSymlinkPlugin])
+    );
+  }
 
   return webpack(this.options);
 }
