@@ -5,11 +5,12 @@
   "main": "index.js",
   "dependencies": {
     "broccoli-plugin": "^1.0.0",
+    "mkdirp": "^0.5.1",
     "rsvp": "^3.0.20",
     "symlink-or-copy": "^1.0.1",
     "webpack": "^1.10.5"
   },
   "devDependencies": {},
   "author": "tfinley@hubspot.com",
-  "repository" : "timmfin/broccoli-webpack-cached"
+  "repository": "timmfin/broccoli-webpack-cached"
 }

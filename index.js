@@ -1,6 +1,8 @@
 'use strict';
 
 var RSVP = require('rsvp');
+var path = require('path');
+var mkdirp = require('mkdirp');
 var webpack = require('webpack');
 var Plugin = require('broccoli-plugin');
 var symlinkOrCopySync = require('symlink-or-copy').sync;
@@ -70,6 +72,7 @@ WebpackFilter.prototype.build = function() {
         // pass and not emitted (aka, cached). And then symlink all of them from the
         // cache folder (where webpack writes) to the output folder
         jsonStats.assets.map(function(asset) {
+          mkdirp.sync(path.dirname(that.outputPath + '/' + asset.name));
           symlinkOrCopySync(that.cachePath + '/' + asset.name, that.outputPath + '/' + asset.name);
         });
 
