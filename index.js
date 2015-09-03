@@ -40,6 +40,9 @@ WebpackFilter.prototype.initializeCompiler = function() {
   // build and rely on it to only build what is necessary)
   this.options.cache = this._webpackCache = {};
 
+  // By default, log webpack's output to the console
+  this.options.logStats = this.options.logStats || true;
+
   // Prevent Webpack's ResultSymlinkPlugin from breaking relative paths in symlinked
   // modules (a common problem with Broccoli's highly symlinked output trees).
   // This is on by default, but can be disabled.
@@ -63,6 +66,23 @@ WebpackFilter.prototype.build = function() {
   return new RSVP.Promise(function(resolve, reject) {
     that.compiler.run(function(err, stats) {
       var jsonStats = stats.toJson();
+
+      if (that.options.logStats) {
+        var loggingOptions;
+
+        // Allow options.logStats to be a string or object that is passed to
+        // stats.toString(). More info in:
+        //   - http://webpack.github.io/docs/node.js-api.html#stats-tostring
+        //   - https://github.com/webpack/webpack/pull/1323
+        if (that.options.logStats === true) {
+          loggingOptions = 'verbose';
+        } else {
+          loggingOptions = that.options.logStats;
+        }
+
+        console.log("\n[webpack]", stats.toString(loggingOptions));
+      }
+
       if (jsonStats.errors.length > 0) jsonStats.errors.forEach(console.error);
       if (jsonStats.warnings.length > 0) jsonStats.warnings.forEach(console.warn);
       if (err || jsonStats.errors.length > 0) {
