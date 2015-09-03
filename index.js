@@ -32,7 +32,10 @@ WebpackFilter.prototype.initializeCompiler = function() {
   if (this.options.cache) throw new Error("WebpackFilter will set the webpack cache, you shouldn't set it.");
   if (this.options.output && this.options.output.path) throw new Error("WebpackFilter will set the webpack output.path, you shouldn't set it.");
 
+  // Input tree path from broccoli
   this.options.context = this.inputPaths[0];
+
+  // Tell Webpack to write to this plugin's cache folder
   this.options.output = this.options.output || {};
   this.options.output.path = this.cachePath;
 
