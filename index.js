@@ -36,6 +36,17 @@ WebpackFilter.prototype.initializeCompiler = function() {
   this.options.output = this.options.output || {};
   this.options.output.path = this.cachePath;
 
+  // Make the input dir a root to lookup modules
+  this.options.resolve = this.options.resolve || {};
+
+  if (typeof this.options.resolve.root === 'string') {
+    this.options.resolve.root = [this.options.resolve.root];
+  } else {
+    this.options.resolve.root = this.options.resolve.root || [];
+  }
+
+  this.options.resolve.root.push(this.inputPaths[0]);
+
   // Let webpack do all the caching (we will call webpack's compile method every
   // build and rely on it to only build what is necessary)
   this.options.cache = this._webpackCache = {};
