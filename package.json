@@ -3,6 +3,7 @@
   "version": "0.1.2",
   "description": "Yet another webpack plugin for Broccoli. This one relies on webpack's caching for speed, but does it in a way that works well as a broccoli plugin (symlinking from the webpack cache to the output folder as needed).",
   "main": "index.js",
+  "license": "MIT",
   "dependencies": {
     "broccoli-plugin": "^1.0.0",
     "mkdirp": "^0.5.1",
