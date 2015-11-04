@@ -10,6 +10,7 @@ Note, internally this uses the [PreventResolveSymlinkPlugin](./prevent-resolve-s
 Inside your `Brocfile.js`:
 
 ```js
+var webpack = require('webpack');
 var mergeTrees = require('broccoli-merge-trees');
 var WebpackFilter = require('broccoli-webpack-cached');
 
