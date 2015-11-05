@@ -93,8 +93,10 @@ WebpackFilter.prototype.build = function() {
 
       // If there is a Webpack error (hard OR soft error), show it and reject
       if(err) {
-        var error = new Error(err.message + '\n' + err.details);
+        console.error('Webpack error in', err.module.rawRequest);
 
+        // Broccoli will log this custom error message itself
+        var error = new Error(err.message + (err.details ? '\n' + err.details : ''));
 
         // TODO, fill in these error properties?
         // file: Path of the file in which the error occurred, relative to one of the inputPaths directories
@@ -106,14 +108,16 @@ WebpackFilter.prototype.build = function() {
       } else if (stats.compilation && stats.compilation.errors && stats.compilation.errors.length) {
 
         var allErrorMessages = stats.compilation.errors.map(function(err) {
-          return err.message + '\n' + err.details;
+          return err.message + (err.details ? '\n' + err.details : '');
         }).join('\n\n');
 
+        // Broccoli will log this custom error message itself
         if (stats.compilation.errors.length == 1) {
           var error = new Error('Webpack build failure:\n' + allErrorMessages);
         } else {
           var error = new Error('Webpack build failures (' + stats.compilation.errors.length + '):\n' + allErrorMessages);
         }
+
         reject(error);
       } else {
 
