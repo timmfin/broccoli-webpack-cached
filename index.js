@@ -91,29 +91,52 @@ WebpackFilter.prototype.build = function() {
   return new RSVP.Promise(function(resolve, reject) {
     that.compiler.run(function(err, stats) {
 
-      // If there is a Webpack error, show it and reject
-      if(err){
-        console.error('Error in', err.module.rawRequest);
-        console.log(err.message);
-        console.log(err.details);
-        reject(err);
+      // If there is a Webpack error (hard OR soft error), show it and reject
+      if(err) {
+        console.error('Webpack error in', err.module.rawRequest);
+
+        // Broccoli will log this custom error message itself
+        var error = new Error(err.message + (err.details ? '\n' + err.details : ''));
+
+        // TODO, fill in these error properties?
+        // file: Path of the file in which the error occurred, relative to one of the inputPaths directories
+        // treeDir: The path that file is relative to. Must be an element of this.inputPaths. (The name treeDir is for historical reasons.)
+        // line: Line in which the error occurred (one-indexed)
+        // column: Column in w
+
+        reject(error);
+      } else if (stats.compilation && stats.compilation.errors && stats.compilation.errors.length) {
+
+        var allErrorMessages = stats.compilation.errors.map(function(err) {
+          return err.message + (err.details ? '\n' + err.details : '');
+        }).join('\n\n');
+
+        // Broccoli will log this custom error message itself
+        if (stats.compilation.errors.length == 1) {
+          var error = new Error('Webpack build failure:\n' + allErrorMessages);
+        } else {
+          var error = new Error('Webpack build failures (' + stats.compilation.errors.length + '):\n' + allErrorMessages);
+        }
+
+        reject(error);
+      } else {
+
+        // If we finished, show the logging we want to see
+        var jsonStats = stats.toJson();
+        if (that.options.logStats) console.log("\n[webpack]", stats.toString(that.options.logStats));
+        if (jsonStats.errors.length > 0) jsonStats.errors.forEach(console.error);
+        if (jsonStats.warnings.length > 0) jsonStats.warnings.forEach(console.warn);
+
+        // Get all of the assets from webpack, both emitted in this current compile
+        // pass and not emitted (aka, cached). And then symlink all of them from the
+        // cache folder (where webpack writes) to the output folder
+        jsonStats.assets.map(function(asset) {
+          mkdirp.sync(path.dirname(that.outputPath + '/' + asset.name));
+          symlinkOrCopySync(that.cachePath + '/' + asset.name, that.outputPath + '/' + asset.name);
+        });
+
+        resolve();
       }
-
-      // If we finished, show the logging we want to see
-      var jsonStats = stats.toJson();
-      if (that.options.logStats) console.log("\n[webpack]", stats.toString(that.options.logStats));
-      if (jsonStats.errors.length > 0) jsonStats.errors.forEach(console.error);
-      if (jsonStats.warnings.length > 0) jsonStats.warnings.forEach(console.warn);
-
-      // Get all of the assets from webpack, both emitted in this current compile
-      // pass and not emitted (aka, cached). And then symlink all of them from the
-      // cache folder (where webpack writes) to the output folder
-      jsonStats.assets.map(function(asset) {
-        mkdirp.sync(path.dirname(that.outputPath + '/' + asset.name));
-        symlinkOrCopySync(that.cachePath + '/' + asset.name, that.outputPath + '/' + asset.name);
-      });
-
-      resolve();
 
     });
   });
