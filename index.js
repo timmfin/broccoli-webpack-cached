@@ -26,6 +26,17 @@ WebpackFilter.prototype = Object.create(Plugin.prototype);
 WebpackFilter.prototype.constructor = WebpackFilter;
 
 
+// "private" helpers
+
+function ensureArray(potentialArray) {
+  if (typeof potentialArray === 'string') {
+    return [potentialArray];
+  } else {
+    return potentialArray || [];
+  }
+}
+
+
 WebpackFilter.prototype.initializeCompiler = function() {
   if (this.options.context) throw new Error("WebpackFilter will set the webpack context, you shouldn't set it.");
   if (this.options.cache) throw new Error("WebpackFilter will set the webpack cache, you shouldn't set it.");
@@ -40,21 +51,21 @@ WebpackFilter.prototype.initializeCompiler = function() {
   this.options.output = this.options.output || {};
   this.options.output.path = this.cachePath;
 
-  // Make the input dir a root to lookup modules
-  this.options.resolve = this.options.resolve || {};
-
-  if (typeof this.options.resolve.root === 'string') {
-    this.options.resolve.root = [this.options.resolve.root];
-  } else {
-    this.options.resolve.root = this.options.resolve.root || [];
-  }
-
-  this.options.resolve.root.push(this.inputPaths[0]);
-
   // Change our working directory so resolve.modulesDirectories searches the
   // latest broccoli piped version of our project rather than the original copies on disk.
   cwd = process.cwd();
   process.chdir(this.inputPaths[0]);
+
+  // Make the input dir a root to lookup modules
+  this.options.resolve = this.options.resolve || {};
+  this.options.resolve.root = ensureArray(this.options.resolve.root);
+  this.options.resolve.root.push(this.inputPaths[0]);
+
+  // Make the original source's node_modules dir a place to lookup loaders
+  this.options.resolveLoader = this.options.resolveLoader || {};
+  this.options.resolveLoader.root = ensureArray(this.options.resolveLoader.root);
+  this.options.resolveLoader.root.push(path.join(cwd, 'node_modules'));
+
 
   // Let webpack do all the caching (we will call webpack's compile method every
   // build and rely on it to only build what is necessary)
