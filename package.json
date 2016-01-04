@@ -13,5 +13,12 @@
   },
   "devDependencies": {},
   "author": "tfinley@hubspot.com",
-  "repository": "timmfin/broccoli-webpack-cached"
+  "repository": "timmfin/broccoli-webpack-cached",
+  "keywords": [
+    "brocoli",
+    "broccoli-plugin",
+    "webpack",
+    "bundle",
+    "es6"
+  ]
 }
