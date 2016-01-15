@@ -1,11 +1,12 @@
 {
   "name": "broccoli-webpack-cached",
-  "version": "0.1.6",
+  "version": "0.2.0-beta",
   "description": "Yet another webpack plugin for Broccoli. This one relies on webpack's caching for speed, but does it in a way that works well as a broccoli plugin (symlinking from the webpack cache to the output folder as needed).",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "broccoli-plugin": "^1.0.0",
+    "memory-fs": "^0.3.0",
     "mkdirp": "^0.5.1",
     "rsvp": "^3.0.20",
     "symlink-or-copy": "^1.0.1",

@@ -1,9 +1,11 @@
 'use strict';
 
+var fs = require('fs');
 var RSVP = require('rsvp');
 var path = require('path');
 var mkdirp = require('mkdirp');
 var webpack = require('webpack');
+var MemoryFS = require('memory-fs');
 var Plugin = require('broccoli-plugin');
 var symlinkOrCopySync = require('symlink-or-copy').sync;
 
@@ -38,6 +40,12 @@ function ensureArray(potentialArray) {
 
 
 WebpackFilter.prototype.initializeCompiler = function() {
+  // Allow for deferred/lazy webpack config (e.g. if we need to wait until
+  // broccoli nodes are setup so we can get at the input/output paths).
+  if (typeof this.options === 'function') {
+    this.options = this.options();
+  }
+
   if (this.options.context) throw new Error("WebpackFilter will set the webpack context, you shouldn't set it.");
   if (this.options.cache) throw new Error("WebpackFilter will set the webpack cache, you shouldn't set it.");
   if (this.options.output && this.options.output.path) throw new Error("WebpackFilter will set the webpack output.path, you shouldn't set it.");
@@ -47,9 +55,9 @@ WebpackFilter.prototype.initializeCompiler = function() {
   // Input tree path from broccoli
   this.options.context = this.inputPaths[0];
 
-  // Tell Webpack to write to this plugin's cache folder
+  // Tell Webpack to write to root of memory fs
   this.options.output = this.options.output || {};
-  this.options.output.path = this.cachePath;
+  this.options.output.path = '/';
 
   // Change our working directory so resolve.modulesDirectories searches the
   // latest broccoli piped version of our project rather than the original copies on disk.
@@ -72,7 +80,18 @@ WebpackFilter.prototype.initializeCompiler = function() {
   this.options.cache = this._webpackCache = {};
 
   // By default, log webpack's output to the console
-  this.options.logStats = (this.options.logStats === undefined) ? true : this.options.logStats;
+  var DEFAULT_LOG_OPTIONS = true;
+  // {
+  //   // assets: true,
+  //   colors: true,
+  //   timings: true,
+  //   modules: true,
+  //   cached: true,
+  //   reasons: true,
+  //   // chunkOrigins: true
+  // };
+
+  this.options.logStats = (this.options.logStats === undefined) ? DEFAULT_LOG_OPTIONS : this.options.logStats;
 
   // Prevent Webpack's ResultSymlinkPlugin from breaking relative paths in symlinked
   // modules (a common problem with Broccoli's highly symlinked output trees).
@@ -84,8 +103,13 @@ WebpackFilter.prototype.initializeCompiler = function() {
     );
   }
 
+
   // Run webpack
   resp = webpack(this.options);
+
+  // Use memory-fs (like webpack-dev-server does) so it doesn't write anything to disk
+  var mfs = new MemoryFS();
+  resp.outputFileSystem = mfs;
 
   // Switch back to original working directory
   process.chdir(cwd);
@@ -103,8 +127,12 @@ WebpackFilter.prototype.build = function() {
     that.compiler.run(function(err, stats) {
 
       // If there is a Webpack error (hard OR soft error), show it and reject
-      if(err) {
-        console.error('Webpack error in', err.module.rawRequest);
+      if (err) {
+        if (err.module) {
+          console.error('Webpack error in', err.module.rawRequest);
+        } else {
+          console.error('Webpack error');
+        }
 
         // Broccoli will log this custom error message itself
         var error = new Error(err.message + (err.details ? '\n' + err.details : ''));
@@ -134,16 +162,38 @@ WebpackFilter.prototype.build = function() {
 
         // If we finished, show the logging we want to see
         var jsonStats = stats.toJson();
+
         if (that.options.logStats) console.log("\n[webpack]", stats.toString(that.options.logStats));
         if (jsonStats.errors.length > 0) jsonStats.errors.forEach(console.error);
         if (jsonStats.warnings.length > 0) jsonStats.warnings.forEach(console.warn);
 
+
+        var memoryFS = that.compiler.outputFileSystem;
+        var writtenFiles = allMemoryFSFiles(memoryFS);
+
+        // Question... does webpack re-write cached assets to the outputFileSystem?
+
         // Get all of the assets from webpack, both emitted in this current compile
-        // pass and not emitted (aka, cached). And then symlink all of them from the
+        // pass and not emitted (aka, cached). And symlink all of them from the
         // cache folder (where webpack writes) to the output folder
+
+        writtenFiles.forEach(function(f) {
+          // Write the new file to the broccoli cache dir
+          mkdirp.sync(path.dirname(that.cachePath + f));
+          fs.writeFileSync(that.cachePath + f, memoryFS.readFileSync("/" + f));
+
+          // And symlink to the output
+          mkdirp.sync(path.dirname(that.outputPath + '/' + f));
+          symlinkOrCopySync(that.cachePath + '/' + f, that.outputPath + '/' + f);
+        });
+
+
+        // Make sure we pick up the assets not emitted (aka cached) during the last build
         jsonStats.assets.map(function(asset) {
-          mkdirp.sync(path.dirname(that.outputPath + '/' + asset.name));
-          symlinkOrCopySync(that.cachePath + '/' + asset.name, that.outputPath + '/' + asset.name);
+          if (asset.emitted === false) {
+            mkdirp.sync(path.dirname(that.outputPath + '/' + asset.name));
+            symlinkOrCopySync(that.cachePath + '/' + asset.name, that.outputPath + '/' + asset.name);
+          }
         });
 
         resolve();
@@ -152,5 +202,24 @@ WebpackFilter.prototype.build = function() {
     });
   });
 };
+
+var allMemoryFSFiles = function(memoryFS, dir) {
+  dir = dir !== undefined ? dir : '/';
+
+  var result = [];
+  var list = memoryFS.readdirSync(dir);
+
+  list.forEach(function(file) {
+    file = path.join(dir, file);
+    var stat = memoryFS.statSync(file);
+    if (stat && stat.isDirectory()) {
+      result = result.concat(allMemoryFSFiles(memoryFS, file));
+    } else {
+      result.push(file);
+    }
+  });
+
+  return result;
+}
 
 module.exports = WebpackFilter;
