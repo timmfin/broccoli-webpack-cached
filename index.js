@@ -79,6 +79,14 @@ WebpackFilter.prototype.initializeCompiler = function() {
   // build and rely on it to only build what is necessary)
   this.options.cache = this._webpackCache = {};
 
+
+  // Save state between builds do that changes to module ids doesn't bust the cache
+  // unnecessarily (https://github.com/webpack/webpack/issues/1315)
+  if (!this.options.recordsPath) {
+    this.options.recordsPath = "/webpack.recordsPath.json";
+  }
+
+
   // By default, log webpack's output to the console
   var DEFAULT_LOG_OPTIONS = true;
   // {
@@ -169,7 +177,11 @@ WebpackFilter.prototype.build = function() {
 
 
         var memoryFS = that.compiler.outputFileSystem;
-        var writtenFiles = allMemoryFSFiles(memoryFS);
+        var writtenBuffersByFilepath = allMemoryFSFiles(memoryFS, {
+          ignore: that.options.recordsPath
+        });
+
+        var filesThatChanged = allChangedMemoryFSFiles(that.lastWrittenBuffersByFilepath, writtenBuffersByFilepath)
 
         // Question... does webpack re-write cached assets to the outputFileSystem?
 
@@ -177,7 +189,7 @@ WebpackFilter.prototype.build = function() {
         // pass and not emitted (aka, cached). And symlink all of them from the
         // cache folder (where webpack writes) to the output folder
 
-        writtenFiles.forEach(function(f) {
+        filesThatChanged.forEach(function(f) {
           // Write the new file to the broccoli cache dir
           mkdirp.sync(path.dirname(that.cachePath + f));
           fs.writeFileSync(that.cachePath + f, memoryFS.readFileSync("/" + f));
@@ -196,6 +208,8 @@ WebpackFilter.prototype.build = function() {
           }
         });
 
+        that.lastWrittenBuffersByFilepath = writtenBuffersByFilepath;
+
         resolve();
       }
 
@@ -203,19 +217,40 @@ WebpackFilter.prototype.build = function() {
   });
 };
 
-var allMemoryFSFiles = function(memoryFS, dir) {
-  dir = dir !== undefined ? dir : '/';
+var allMemoryFSFiles = function(memoryFS, options) {
+  options = options !== undefined ? options : {};
+  var dir = options.dir !== undefined ? options.dir : '/';
+  var ignore = options.ignore !== undefined ? options.ignore : [];
 
-  var result = [];
+  var result = options.resultsSoFar !== undefined ? options.resultsSoFar : Object.create(null);
   var list = memoryFS.readdirSync(dir);
 
   list.forEach(function(file) {
+    // Skip ignored files
+    if (ignore && ignore.indexOf(file) >= 0) {
+      return;
+    }
+
     file = path.join(dir, file);
     var stat = memoryFS.statSync(file);
     if (stat && stat.isDirectory()) {
-      result = result.concat(allMemoryFSFiles(memoryFS, file));
+      options.dir = file;
+      options.resultsSoFar = results;
+      allMemoryFSFiles(memoryFS, options);
     } else {
-      result.push(file);
+      result[file] = memoryFS.readFileSync(file);
+    }
+  });
+
+  return result;
+}
+
+var allChangedMemoryFSFiles = function(lastBuffersByFilepath, newBuffersByFilepath) {
+  var result = [];
+
+  Object.keys(newBuffersByFilepath).forEach(function(filepath) {
+    if (!lastBuffersByFilepath || !lastBuffersByFilepath[filepath] || lastBuffersByFilepath[filepath] !== newBuffersByFilepath[filepath]) {
+      result.push(filepath);
     }
   });
 

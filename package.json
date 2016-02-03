@@ -12,7 +12,22 @@
     "symlink-or-copy": "^1.0.1",
     "webpack": "^1.10.5"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "broccoli": "^0.16.9",
+    "broccoli-babel-transpiler": "^5.5.0",
+    "broccoli-merge-trees": "^1.1.1",
+    "broccoli-stew": "^1.2.0",
+    "chai": "^3.5.0",
+    "css-loader": "^0.23.1",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "html-webpack-plugin": "^2.7.2",
+    "mocha": "^2.4.5",
+    "source-map-loader": "^0.1.5",
+    "style-loader": "^0.13.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
   "author": "tfinley@hubspot.com",
   "repository": "timmfin/broccoli-webpack-cached"
 }
