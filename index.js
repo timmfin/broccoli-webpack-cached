@@ -112,10 +112,10 @@ WebpackFilter.prototype.initializeCompiler = function() {
   // modules (a common problem with Broccoli's highly symlinked output trees).
   // This is on by default, but can be disabled.
   if (this.options.preventSymlinkResolution === true || this.options.preventSymlinkResolution === undefined)  {
-    // this.options.plugins = this.options.plugins || [];
-    // this.options.plugins.push(
-    //   new webpack.ResolverPlugin([PreventResolveSymlinkPlugin])
-    // );
+    this.options.plugins = this.options.plugins || [];
+    this.options.plugins.push(
+      new webpack.ResolverPlugin([PreventResolveSymlinkPlugin])
+    );
   }
 
 
