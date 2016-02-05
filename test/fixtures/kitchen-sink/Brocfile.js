@@ -111,11 +111,6 @@ var bundleTree = WebpackFilter(tree, {
     root: []
   }
 
-}, function(webpackCompiler) {
-  // Hacky debugging callback
-
-  // Pass through for access to inputFileSystem
-  module.exports.webpackCompiler = webpackCompiler;
 });
 
 bundleTree = log(bundleTree, {output: 'tree'});

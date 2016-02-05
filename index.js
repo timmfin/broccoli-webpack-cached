@@ -11,8 +11,8 @@ var symlinkOrCopySync = require('symlink-or-copy').sync;
 
 var PreventResolveSymlinkPlugin = require('./prevent-resolve-symlink-plugin');
 
-function WebpackFilter(inputNode, options, postBuildDebugCallback) {
-  if (!(this instanceof WebpackFilter)) return new WebpackFilter(inputNode, options, postBuildDebugCallback);
+function WebpackFilter(inputNode, options) {
+  if (!(this instanceof WebpackFilter)) return new WebpackFilter(inputNode, options);
 
   if (Array.isArray(inputNode)) {
     throw new Error("WebpackFilter only accepts a single inputNode");
@@ -22,9 +22,6 @@ function WebpackFilter(inputNode, options, postBuildDebugCallback) {
     annotation: options.annotation
   });
   this.options = options;
-
-  console.log("postBuildDebugCallback", postBuildDebugCallback);
-  this.postBuildDebugCallback = postBuildDebugCallback;
 }
 
 WebpackFilter.prototype = Object.create(Plugin.prototype);
@@ -216,10 +213,6 @@ WebpackFilter.prototype.build = function() {
         });
 
         that.lastWrittenBuffersByFilepath = writtenBuffersByFilepath;
-
-        if (that.postBuildDebugCallback) {
-          that.postBuildDebugCallback(that.compiler);
-        }
 
         resolve();
       }
