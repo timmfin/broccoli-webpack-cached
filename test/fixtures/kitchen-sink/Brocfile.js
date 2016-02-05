@@ -43,9 +43,9 @@ var bundleTree = WebpackFilter(tree, {
   },
 
   plugins: [
-    new webpack.optimize.CommonsChunkPlugin("extra.bundle.js"),
-
     // new webpack.optimize.UglifyJsPlugin(),
+
+    new webpack.optimize.CommonsChunkPlugin("extra.bundle.js"),
 
     new HtmlWebpackPlugin({
       filename: 'one.html',
@@ -111,6 +111,11 @@ var bundleTree = WebpackFilter(tree, {
     root: []
   }
 
+}, function(webpackCompiler) {
+  // Hacky debugging callback
+
+  // Pass through for access to inputFileSystem
+  module.exports.webpackCompiler = webpackCompiler;
 });
 
 bundleTree = log(bundleTree, {output: 'tree'});

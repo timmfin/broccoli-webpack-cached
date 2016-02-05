@@ -11,8 +11,8 @@ var symlinkOrCopySync = require('symlink-or-copy').sync;
 
 var PreventResolveSymlinkPlugin = require('./prevent-resolve-symlink-plugin');
 
-function WebpackFilter(inputNode, options) {
-  if (!(this instanceof WebpackFilter)) return new WebpackFilter(inputNode, options);
+function WebpackFilter(inputNode, options, postBuildDebugCallback) {
+  if (!(this instanceof WebpackFilter)) return new WebpackFilter(inputNode, options, postBuildDebugCallback);
 
   if (Array.isArray(inputNode)) {
     throw new Error("WebpackFilter only accepts a single inputNode");
@@ -22,6 +22,9 @@ function WebpackFilter(inputNode, options) {
     annotation: options.annotation
   });
   this.options = options;
+
+  console.log("postBuildDebugCallback", postBuildDebugCallback);
+  this.postBuildDebugCallback = postBuildDebugCallback;
 }
 
 WebpackFilter.prototype = Object.create(Plugin.prototype);
@@ -77,7 +80,8 @@ WebpackFilter.prototype.initializeCompiler = function() {
 
   // Let webpack do all the caching (we will call webpack's compile method every
   // build and rely on it to only build what is necessary)
-  this.options.cache = this._webpackCache = {};
+  // this.options.cache = this._webpackCache = {};
+  this.options.cache = true;
 
 
   // Save state between builds do that changes to module ids doesn't bust the cache
@@ -89,13 +93,16 @@ WebpackFilter.prototype.initializeCompiler = function() {
 
   // By default, log webpack's output to the console
   var DEFAULT_LOG_OPTIONS = true;
-  // {
+  // var DEFAULT_LOG_OPTIONS =  {
   //   // assets: true,
+
   //   colors: true,
-  //   timings: true,
   //   modules: true,
   //   cached: true,
-  //   reasons: true,
+
+  //   hash: true
+  //   // timings: true,
+  //   // reasons: true,
   //   // chunkOrigins: true
   // };
 
@@ -105,10 +112,10 @@ WebpackFilter.prototype.initializeCompiler = function() {
   // modules (a common problem with Broccoli's highly symlinked output trees).
   // This is on by default, but can be disabled.
   if (this.options.preventSymlinkResolution === true || this.options.preventSymlinkResolution === undefined)  {
-    this.options.plugins = this.options.plugins || [];
-    this.options.plugins.push(
-      new webpack.ResolverPlugin([PreventResolveSymlinkPlugin])
-    );
+    // this.options.plugins = this.options.plugins || [];
+    // this.options.plugins.push(
+    //   new webpack.ResolverPlugin([PreventResolveSymlinkPlugin])
+    // );
   }
 
 
@@ -209,6 +216,10 @@ WebpackFilter.prototype.build = function() {
         });
 
         that.lastWrittenBuffersByFilepath = writtenBuffersByFilepath;
+
+        if (that.postBuildDebugCallback) {
+          that.postBuildDebugCallback(that.compiler);
+        }
 
         resolve();
       }
