@@ -1,4 +1,5 @@
 var log               = require('broccoli-stew').log;
+var afterBuild        = require('broccoli-stew').afterBuild;
 var webpack           = require('webpack');
 var mergeTrees        = require('broccoli-merge-trees');
 var esTranspiler      = require('broccoli-babel-transpiler');
@@ -13,9 +14,19 @@ var tree = './src';
 
 tree = log(tree, {output: 'tree'});
 
+tree = afterBuild(tree, function(outputDir) {
+  var mtime = require('fs').statSync(outputDir + '/js/1.js').mtime
+  console.log('1.js  (' +  mtime + '):\n' + require('fs').readFileSync(outputDir + '/js/1.js'));
+});
+
 tree = esTranspiler(tree, {
   sourceMaps: 'inline',
   filterExtensions: ['js']
+});
+
+tree = afterBuild(tree, function(outputDir) {
+  var mtime = require('fs').statSync(outputDir + '/js/1.js').mtime
+  console.log('1.js  (' +  mtime + ')::\n' + require('fs').readFileSync(outputDir + '/js/1.js'));
 });
 
 
