@@ -77,8 +77,7 @@ WebpackFilter.prototype.initializeCompiler = function() {
 
   // Let webpack do all the caching (we will call webpack's compile method every
   // build and rely on it to only build what is necessary)
-  // this.options.cache = this._webpackCache = {};
-  this.options.cache = true;
+  this.options.cache = this._webpackCache = {};
 
 
   // Save state between builds do that changes to module ids doesn't bust the cache

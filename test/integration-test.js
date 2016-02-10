@@ -150,7 +150,6 @@ describe('broccoli-webpack-cached', function() {
 
     it('should build after adding a new line', function() {
       appendToFile(fixturePath('kitchen-sink', 'src/js/1.js'), 'console.log(\'new line added by INTEGRATION TEST\');\n');
-      webpackCompiler.inputFileSystem.purge();
 
       return buildPromise = builder.build().then(function(result) {
 
@@ -170,7 +169,6 @@ describe('broccoli-webpack-cached', function() {
 
     it('should build after removing that new line', function() {
       restoreFileAndBumpMtime(fixturePath('kitchen-sink', 'src/js/1.js'));
-      webpackCompiler.inputFileSystem.purge();
 
       return buildPromise = builder.build().then(function(result) {
 
@@ -190,7 +188,6 @@ describe('broccoli-webpack-cached', function() {
 
     it('should errro after removing a necessary file', function() {
       deleteFile(fixturePath('kitchen-sink', 'src/js/1.js'));
-      webpackCompiler.inputFileSystem.purge();
 
       expect
       return buildPromise = builder.build().then(function(result) {
@@ -203,7 +200,6 @@ describe('broccoli-webpack-cached', function() {
 
     it('should work again after bringing the file back', function() {
       restoreFileAndBumpMtime(fixturePath('kitchen-sink', 'src/js/1.js'));
-      webpackCompiler.inputFileSystem.purge();
 
       return buildPromise = builder.build().then(function(result) {
         ['requireTest-bundle.js']
@@ -218,7 +214,6 @@ describe('broccoli-webpack-cached', function() {
 
     it('should work after removing a require dep', function() {
       searchAndReplaceInFile(fixturePath('kitchen-sink', 'src/js/combiner.js'), "require('./1.js')", "/* HIDDEN IN TEST: require('./1.js') */");
-      webpackCompiler.inputFileSystem.purge();
 
       return buildPromise = builder.build().then(function(result) {
         ['requireTest-bundle.js']
@@ -237,7 +232,6 @@ describe('broccoli-webpack-cached', function() {
 
     it('should work after bringing require dep back', function() {
       restoreFileAndBumpMtime(fixturePath('kitchen-sink', 'src/js/combiner.js'));
-      webpackCompiler.inputFileSystem.purge();
 
       return buildPromise = builder.build().then(function(result) {
         ['requireTest-bundle.js']
