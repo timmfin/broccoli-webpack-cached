@@ -93,7 +93,7 @@ function logFileIfDesired(filepath) {
 
 
 describe('broccoli-webpack-cached', function() {
-  this.timeout(5000);
+  this.timeout(20000);
 
   describe('kitchen sink integration test', function() {
     var builder,
