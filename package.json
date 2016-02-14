@@ -5,6 +5,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "broccoli-caching-writer": "^2.2.1",
     "broccoli-plugin": "^1.0.0",
     "memory-fs": "^0.3.0",
     "mkdirp": "^0.5.1",

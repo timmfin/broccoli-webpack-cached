@@ -7,6 +7,7 @@ var mkdirp = require('mkdirp');
 var webpack = require('webpack');
 var MemoryFS = require('memory-fs');
 var Plugin = require('broccoli-plugin');
+var CachingWriter = require('broccoli-caching-writer');
 var symlinkOrCopySync = require('symlink-or-copy').sync;
 
 var PreventResolveSymlinkPlugin = require('./prevent-resolve-symlink-plugin');
@@ -18,13 +19,13 @@ function WebpackFilter(inputNode, options) {
     throw new Error("WebpackFilter only accepts a single inputNode");
   }
 
-  Plugin.call(this, [inputNode], {
+  CachingWriter.call(this, [inputNode], {
     annotation: options.annotation
   });
   this.options = options;
 }
 
-WebpackFilter.prototype = Object.create(Plugin.prototype);
+WebpackFilter.prototype = Object.create(CachingWriter.prototype);
 WebpackFilter.prototype.constructor = WebpackFilter;
 
 
