@@ -16,7 +16,7 @@ tree = log(tree, {output: 'tree'});
 
 tree = afterBuild(tree, function(outputDir) {
   var mtime = require('fs').statSync(outputDir + '/js/1.js').mtime
-  console.log('1.js  (' +  mtime + '):\n' + require('fs').readFileSync(outputDir + '/js/1.js'));
+  console.log('1.js  (' +  mtime.getTime() + '):\n' + require('fs').readFileSync(outputDir + '/js/1.js'));
 });
 
 tree = esTranspiler(tree, {
@@ -26,7 +26,7 @@ tree = esTranspiler(tree, {
 
 tree = afterBuild(tree, function(outputDir) {
   var mtime = require('fs').statSync(outputDir + '/js/1.js').mtime
-  console.log('1.js  (' +  mtime + ')::\n' + require('fs').readFileSync(outputDir + '/js/1.js'));
+  console.log('1.js  (' +  mtime.getTime() + ')::\n' + require('fs').readFileSync(outputDir + '/js/1.js'));
 });
 
 

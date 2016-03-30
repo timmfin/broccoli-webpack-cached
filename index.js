@@ -187,8 +187,6 @@ WebpackFilter.prototype.build = function() {
 
         var filesThatChanged = allChangedMemoryFSFiles(that.lastWrittenBuffersByFilepath, writtenBuffersByFilepath)
 
-        // Question... does webpack re-write cached assets to the outputFileSystem?
-
         // Get all of the assets from webpack, both emitted in this current compile
         // pass and not emitted (aka, cached). And symlink all of them from the
         // cache folder (where webpack writes) to the output folder
