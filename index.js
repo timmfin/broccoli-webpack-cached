@@ -237,7 +237,7 @@ var allMemoryFSFiles = function(memoryFS, options) {
     var stat = memoryFS.statSync(file);
     if (stat && stat.isDirectory()) {
       options.dir = file;
-      options.resultsSoFar = results;
+      options.resultsSoFar = result;
       allMemoryFSFiles(memoryFS, options);
     } else {
       result[file] = memoryFS.readFileSync(file);
