@@ -11,7 +11,7 @@
     "mkdirp": "^0.5.1",
     "rsvp": "^3.0.20",
     "symlink-or-copy": "^1.0.1",
-    "webpack": "timmfin/webpack#mtime-for-caching"
+    "webpack": "timmfin/webpack#mtime-for-caching-plus-puge-fix"
   },
   "devDependencies": {
     "broccoli": "^0.16.9",
