@@ -111,7 +111,7 @@ WebpackFilter.prototype.initializeCompiler = function() {
   if (this.options.preventSymlinkResolution === true || this.options.preventSymlinkResolution === undefined)  {
     this.options.plugins = this.options.plugins || [];
     this.options.plugins.push(
-      new webpack.ResolverPlugin([PreventResolveSymlinkPlugin])
+      PreventResolveSymlinkPlugin
     );
   }
 

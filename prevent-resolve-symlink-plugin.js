@@ -4,10 +4,14 @@
 // work with Webpack (otherwise relative module paths inside symlinked modules would
 // break)
 var PreventResolveSymlinkPlugin = {
-  apply: function(resolver) {
-    resolver.plugin('result', function(request, callback) {
-      // Call the callback to prevent any other "result" plugins from running
-      callback(null, request);
+  apply: function(compiler) {
+    compiler.plugin("after-resolvers", function(compiler) {
+      function onlyNotResultSymlinkPluginFuncs(func) {
+        return func.toString().indexOf('resolved symlink to') === -1;
+      }
+
+      compiler.resolvers.normal._plugins.result = compiler.resolvers.normal._plugins.result.filter(onlyNotResultSymlinkPluginFuncs);
+      compiler.resolvers.context._plugins.result = compiler.resolvers.normal._plugins.result.filter(onlyNotResultSymlinkPluginFuncs);
     });
   }
 };
