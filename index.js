@@ -44,7 +44,7 @@ WebpackFilter.prototype.initializeCompiler = function() {
   // Allow for deferred/lazy webpack config (e.g. if we need to wait until
   // broccoli nodes are setup so we can get at the input/output paths).
   if (typeof this.options === 'function') {
-    this.options = this.options();
+    this.options = this.options(this.inputPaths[0]);
   }
 
   if (this.options.context) throw new Error("WebpackFilter will set the webpack context, you shouldn't set it.");
