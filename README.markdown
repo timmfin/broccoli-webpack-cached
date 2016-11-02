@@ -1,3 +1,6 @@
+**Note, our internal tooling has moved away from Broccoli so I'm not maintaining this anymore. If anyone wants to pick it up and run with it, please be my guest.**
+
+----
 
 Yet another webpack plugin for Broccoli. This one relies on webpack's caching, but does it in a way that works well as a broccoli plugin (letting webpack write to the cache folder and then symlinking from that to the final output folder as needed).
 
